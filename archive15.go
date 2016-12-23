@@ -373,6 +373,9 @@ func (a *archive15) readBlockHeader() (*blockHeader15, error) {
 		_, err = io.ReadFull(r, b)
 	}
 	if err != nil {
+		if err == io.EOF && a.v != nil {
+			return nil, errArchiveContinues
+		}
 		return nil, err
 	}
 
