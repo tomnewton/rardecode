@@ -183,8 +183,25 @@ func (v *volume) nextVolName() {
 	} else {
 		n++
 	}
+
 	vol := fmt.Sprintf("%0"+fmt.Sprint(hi-lo)+"d", n)
 	v.name = dir + file[:lo] + vol + file[hi:]
+
+	if n > 99 {
+		// over a 99... there appears to be different ways of naming..
+		//either r100, r101 etc... or s00, s01 etc...
+
+		//check if above method actually finds a file...
+		nfo, err := os.Stat(v.name)
+		if err == nil && nfo != nil {
+			return
+		}
+		// couldn't find a file the old fashioned way...
+		a := fmt.Sprintf("%d", n)
+		vol := fmt.Sprintf("s%s", a[len(a)-2:])
+		dotIndex := strings.LastIndex(file, ".") + 1
+		v.name = dir + file[:dotIndex] + vol
+	}
 }
 
 func (v *volume) next() (*fileBlockHeader, error) {
